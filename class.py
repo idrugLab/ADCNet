@@ -55,33 +55,18 @@ def score(y_test, y_pred):
     return tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV
 
 def DAR_feature(file_path, column_name):
-    # 读取 Excel 文件
     df = pd.read_excel(file_path)
-
-    # 提取需要处理的列
     column_data = df[column_name].values.reshape(-1, 1)
-
-    # 标准化
     scaler = StandardScaler()
     column_data_standardized = scaler.fit_transform(column_data)
-
-    # 归一化
     column_data_normalized = tf.keras.utils.normalize(column_data_standardized, axis=0).flatten()
-
-    # 构建字典
     data_dict = {index: tf.constant(value, dtype=tf.float32) for index, value in zip(df.index, column_data_normalized)}
-
     return data_dict
 
 Heavy_dict = cover_dict('Heavy_1280.pkl')
 Light_dict = cover_dict('Light_1280.pkl')
 Antigen_dict = cover_dict('Antigen_1280.pkl')
 DAR_dict = DAR_feature('data.xlsx', 'DAR_val')
-
-print(len(Heavy_dict))
-print(len(Light_dict))
-print(len(Antigen_dict))
-
 
 def main(seed, args):
 
@@ -107,8 +92,8 @@ def main(seed, args):
     np.random.seed(seed=seed)
     tf.random.set_seed(seed=seed)
     train_dataset, test_dataset, val_dataset = Graph_Classification_Dataset('data.xlsx', 
-                                                                            smiles_field1='Payload Isosmiles（71个）',
-                                                                            smiles_field2='Linker Isosmiles（82个）',
+                                                                            smiles_field1='Payload Isosmiles',
+                                                                            smiles_field2='Linker Isosmiles',
                                                                             label_field=label,
                                                                             index_field=idx, 
                                                                             seed=seed,
@@ -445,24 +430,16 @@ if __name__ == '__main__':
     print(" PPV_l:", PPV_l)
     print("NPV_l:", NPV_l)
 
-    filename = 'FG-BERT_output_seed289.csv'
+    filename = 'FG-BERT_output_seed.csv'
 
     column_names = ['tp', 'tn', 'fn', 'fp', 'se', 'sp', 'mcc', 'acc', 'auc', 'F1', 'BA', 'prauc','PPV', 'NPV']
 
-    # 将列表组合成一个列表，作为 CSV 文件的行
     rows = zip(tp_l, tn_l, fn_l, fp_l, se_l, sp_l, mcc_l, acc_l, auc_roc_score_l, F1_l, BA_l, prauc_l, PPV_l, NPV_l)
 
-    # 打开 CSV 文件进行写入
     with open(filename, mode='w', newline='') as file:
-        # 创建 CSV 写入对象
         writer = csv.writer(file)
-
-        # 写入列名
         writer.writerow(column_names)
-
-        # 写入数据行
         writer.writerows(rows)
-
     print(f'CSV 文件 {filename} 写入完成')
 
 
