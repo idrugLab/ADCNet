@@ -1,6 +1,6 @@
 # ADCNet
 semi-supervised learning for ADC property prediction.
-![image](https://github.com/idrugLab/ADCNet/blob/main/Fig1_ADCNet.tif)
+![image](https://github.com/idrugLab/ADCNet/blob/main/Fig1_ADCNet.png)
 
 # Requried package: 
 
