@@ -349,7 +349,7 @@ space = {"dense_dropout": hp.quniform("dense_dropout", 0, 0.5, 0.05),
 def hy_main(args):
     test_auc_list = []
     x = 0
-    for seed in [8,9,10]:
+    for seed in [9]:
         print(seed)
         test_auc,tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV = main(seed, args)
         test_auc_list.append(test_auc)
@@ -362,26 +362,22 @@ def hy_main(args):
     print(args["num_heads"])
     return -x
 
-#best = fmin(hy_main, space, algo = tpe.suggest, max_evals= 30)
-#print(best)
+best = fmin(hy_main, space, algo = tpe.suggest, max_evals= 30)
+print(best)
 best_dict = {}
 a = [16,32,48,64]
 b = [4, 8]
-#best_dict["dense_dropout"] = best["dense_dropout"]
-#best_dict["learning_rate"] = best["learning_rate"]
-#best_dict["batch_size"] = a[best["batch_size"]]
-#best_dict["num_heads"] = b[best["num_heads"]]
-best_dict["dense_dropout"] = 0.30000000000000004
-best_dict["learning_rate"] = 5.5847758199523973e-05
-best_dict["batch_size"] = 32
-best_dict["num_heads"] = 8
+best_dict["dense_dropout"] = best["dense_dropout"]
+best_dict["learning_rate"] = best["learning_rate"]
+best_dict["batch_size"] = a[best["batch_size"]]
+best_dict["num_heads"] = b[best["num_heads"]]
 print(best_dict)
 
 if __name__ == '__main__':
 
     test_auc_list = []
     tp_l, tn_l, fn_l, fp_l, se_l, sp_l, mcc_l, acc_l, auc_roc_score_l, F1_l, BA_l, prauc_l, PPV_l, NPV_l = [],[],[],[],[],[],[],[],[],[],[],[],[],[]
-    for seed in [2]:
+    for seed in [9]:
         print(seed)
         test_auc,tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV = main(seed, best_dict)
         test_auc_list.append(test_auc)
