@@ -5,7 +5,7 @@ semi-supervised learning for ADC property prediction.
 # Requried package: 
 
 ## Example of FG-BERT environment installation：
---conda create -n FG-BERT python==3.7
+--conda create -n ADCNet python==3.7
 
 --pip install tensorflow==2.3
 
