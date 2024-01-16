@@ -57,7 +57,7 @@ Light_dict = cover_dict('Light.pkl')
 Antigen_dict = cover_dict('Antigen.pkl')
 DAR_dict = DAR_feature('data.xlsx', 'DAR')
 
-medium = {'name':'Medium','num_layers': 6, 'num_heads': 4, 'd_model': 256,'path':'medium_weights','addH':True}
+medium = {'name':'Medium','num_layers': 6, 'num_heads': 8, 'd_model': 256,'path':'medium_weights','addH':True}
 arch = medium
 trained_epoch = 20
 num_layers = arch['num_layers']
