@@ -30,5 +30,9 @@ semi-supervised learning for ADC property prediction.
 
 --pip install torch
 ## Examples of obtaining embeddings for antibodies or antigens.
---conda activate esm-2
---python ESM-2.py
+conda activate esm-2
+
+python ESM-2.py
+
+After completion of the run, you will find a .pkl file in the current directory. It is a dictionary where the keys are ADC IDs (if there is no ADC ID, you can add a column with numerical values to the original data and name it ADC ID), and the values are tensors of 1280 dimensions.
+
