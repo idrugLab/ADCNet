@@ -1,0 +1,1 @@
+This is a weight file, which is the model's weights fine-tuned using the ADC dataset. You can use it to predict the activity of unknown ADCs.
