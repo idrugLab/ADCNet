@@ -288,3 +288,38 @@ class Graph_Regression_Dataset(object):  #  Graph regression task dataset proces
         adjoin_matrix.set_shape([None,None])
         y.set_shape([None])
         return x, adjoin_matrix , y
+
+class Inference_Dataset(object):
+    def __init__(self,sml_list,max_len=500,addH=True):
+        self.vocab = str2num
+        self.devocab = num2str
+        self.sml_list = [i for i in sml_list if len(i)<max_len]
+        self.addH =  addH
+
+    def get_data(self):
+
+        self.dataset = tf.data.Dataset.from_tensor_slices((self.sml_list,))
+        self.dataset = self.dataset.map(self.tf_numerical_smiles).padded_batch(512, padded_shapes=(
+            tf.TensorShape([None]), tf.TensorShape([None,None]),tf.TensorShape([1]),tf.TensorShape([None]))).cache().prefetch(20)
+
+        return self.dataset
+
+    def numerical_smiles(self, smiles):
+        smiles_origin = smiles
+        smiles = smiles.numpy().decode()
+        atoms_list, adjoin_matrix = smiles2adjoin(smiles,explicit_hydrogens=self.addH)
+        atoms_list = ['<global>'] + atoms_list
+        nums_list =  [str2num.get(i,str2num['<unk>']) for i in atoms_list]
+        temp = np.ones((len(nums_list),len(nums_list)))
+        temp[1:,1:] = adjoin_matrix
+        adjoin_matrix = (1-temp)*(-1e9)
+        x = np.array(nums_list).astype('int64')
+        return x, adjoin_matrix,[smiles], atoms_list
+
+    def tf_numerical_smiles(self, smiles):
+        x,adjoin_matrix,smiles,atom_list = tf.py_function(self.numerical_smiles, [smiles], [tf.int64, tf.float32,tf.string, tf.string])
+        x.set_shape([None])
+        adjoin_matrix.set_shape([None,None])
+        smiles.set_shape([1])
+        atom_list.set_shape([None])
+        return x, adjoin_matrix,smiles,atom_list
