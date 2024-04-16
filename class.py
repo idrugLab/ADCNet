@@ -72,7 +72,7 @@ def main(seed, args):
 
     task = 'ADC'
     idx = ['index']
-    label = ['new label（100nm）']
+    label = ['label（100nm）']
 
     arch = {'name': 'Medium', 'path': 'medium3_weights'}
     pretraining = True
