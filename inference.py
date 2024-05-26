@@ -38,7 +38,6 @@ def score(y_test, y_pred):
     NPV = tn / (fn + tn)
     return tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV
 
-
 def DAR_feature(file_path, column_name):
     df = pd.read_excel(file_path)
     column_data = df[column_name].values.reshape(-1, 1)
@@ -48,9 +47,7 @@ def DAR_feature(file_path, column_name):
     column_data_standardized = (column_data - mean_value) / std_deviation
     normalized_data = (column_data_standardized - 0.8) / (12 - 0.8)
     data_dict = {index: tf.constant(value, dtype=tf.float32) for index, value in zip(df.index, normalized_data.flatten())}
-    
     return data_dict
-
 
 Heavy_dict = cover_dict('Heavy.pkl')
 Light_dict = cover_dict('Light.pkl')
@@ -64,18 +61,15 @@ num_layers = arch['num_layers']
 num_heads = arch['num_heads']
 d_model = arch['d_model']
 addH = arch['addH']
-
 dff = d_model * 2
 vocab_size = 18
 dense_dropout = 0.1
-
 seed = 1
 df = pd.read_excel('data.xlsx')
 np.random.seed(seed=seed)
 tf.random.set_seed(seed=seed)
 sml_list1 = df['Payload Isosmiles'].tolist()
 sml_list2 = df['Linker Isosmiles'].tolist()
-
 
 ans = []
 y_preds = []
@@ -88,12 +82,10 @@ for i in range(n):
     t2 = Light_dict[i]
     t3 = Antigen_dict[i]
     t4 = DAR_dict[i].numpy()
-
     t1 = tf.expand_dims(t1, axis=0)
     t2 = tf.expand_dims(t2, axis=0)
     t3 = tf.expand_dims(t3, axis=0)
     t4 = tf.constant(t4, shape=(1, 1))
-
 
     inference_dataset1 = Inference_Dataset(x1,addH=addH).get_data()
     inference_dataset2 = Inference_Dataset(x2,addH=addH).get_data()
