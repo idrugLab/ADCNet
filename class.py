@@ -373,67 +373,41 @@ best_dict["batch_size"] = a[best["batch_size"]]
 best_dict["num_heads"] = b[best["num_heads"]]
 print(best_dict)
 
-if __name__ == '__main__':
+def run_experiment(seed_list, best_dict):
+    results = {
+        'test_auc': [], 'tp': [], 'tn': [], 'fn': [], 'fp': [],
+        'se': [], 'sp': [], 'mcc': [], 'acc': [],
+        'auc_roc_score': [], 'F1': [], 'BA': [],
+        'prauc': [], 'PPV': [], 'NPV': []
+    }
 
-    test_auc_list = []
-    tp_l, tn_l, fn_l, fp_l, se_l, sp_l, mcc_l, acc_l, auc_roc_score_l, F1_l, BA_l, prauc_l, PPV_l, NPV_l = [],[],[],[],[],[],[],[],[],[],[],[],[],[]
-    for seed in [9]:
+    for seed in seed_list:
         print(seed)
-        test_auc,tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV = main(seed, best_dict)
-        test_auc_list.append(test_auc)
-        tp_l.append(tp)
-        tn_l.append(tn)
-        fn_l.append(fn)
-        fp_l.append(fp)
-        se_l.append(se)
-        sp_l.append(sp)
-        mcc_l.append(mcc)
-        acc_l.append(acc)
-        auc_roc_score_l.append(auc_roc_score)
-        F1_l.append(F1)
-        BA_l.append(BA)
-        prauc_l.append(prauc)
-        PPV_l.append(PPV)
-        NPV_l.append(NPV)
-    test_auc_list.append(np.mean(test_auc_list))
-    tp_l.append(np.mean(tp_l))
-    tn_l.append(np.mean(tn_l))
-    fn_l.append(np.mean(fn_l))
-    fp_l.append(np.mean(fp_l))
-    se_l.append(np.mean(se_l))
-    sp_l.append(np.mean(sp_l))
-    mcc_l.append(np.mean(mcc_l))
-    acc_l.append(np.mean(acc_l))
-    auc_roc_score_l.append(np.mean(auc_roc_score_l))
-    F1_l.append(np.mean(F1_l))
-    BA_l.append(np.mean(BA_l))
-    prauc_l.append(np.mean(prauc_l))
-    PPV_l.append(np.mean(PPV_l))
-    NPV_l.append(np.mean(NPV_l))
-    print("test_auc_list:", test_auc_list)
-    print("tp_l:", tp_l)
-    print("tn_l:", tn_l)
-    print("fn_l:", fn_l)
-    print("fp_l:", fp_l)
-    print("se_l:", se_l)
-    print("sp_l:", sp_l)
-    print("mcc_l:", mcc_l)
-    print("acc_l:", acc_l)
-    print("auc_roc_score_l:", auc_roc_score_l)
-    print("F1_l:", F1_l)
-    print("BA_l:", BA_l)
-    print("prauc_l:", prauc_l)
-    print(" PPV_l:", PPV_l)
-    print("NPV_l:", NPV_l)
+        result_values = main(seed, best_dict)
+        for key, value in zip(results.keys(), result_values):
+            results[key].append(value)
 
-    filename = 'FG-BERT_output.csv'
+    for key in results:
+        results[key].append(np.mean(results[key]))
+    
+    return results
 
-    column_names = ['tp', 'tn', 'fn', 'fp', 'se', 'sp', 'mcc', 'acc', 'auc', 'F1', 'BA', 'prauc','PPV', 'NPV']
-
-    rows = zip(tp_l, tn_l, fn_l, fp_l, se_l, sp_l, mcc_l, acc_l, auc_roc_score_l, F1_l, BA_l, prauc_l, PPV_l, NPV_l)
-
+def save_results_to_csv(results, filename):
+    column_names = ['tp', 'tn', 'fn', 'fp', 'se', 'sp', 'mcc', 'acc', 'auc', 'F1', 'BA', 'prauc', 'PPV', 'NPV']
+    rows = zip(results['tp'], results['tn'], results['fn'], results['fp'], results['se'], results['sp'], 
+               results['mcc'], results['acc'], results['auc_roc_score'], results['F1'], results['BA'], 
+               results['prauc'], results['PPV'], results['NPV'])
+    
     with open(filename, mode='w', newline='') as file:
         writer = csv.writer(file)
+        writer.writerow(column_names)
+        writer.writerows(rows)
+
+if __name__ == '__main__':
+    seed_list = [2, 8, 9]
+    results = run_experiment(seed_list, best_dict)
+    filename = 'FG-BERT_output.csv'
+    save_results_to_csv(results, filename)
         writer.writerow(column_names)
         writer.writerows(rows)
     print(f'CSV 文件 {filename} 写入完成')
