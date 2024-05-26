@@ -62,7 +62,36 @@ def DAR_feature(file_path, column_name):
     column_data_normalized = tf.keras.utils.normalize(column_data_standardized, axis=0).flatten()
     data_dict = {index: tf.constant(value, dtype=tf.float32) for index, value in zip(df.index, column_data_normalized)}
     return data_dict
+def run_experiment(seed_list, best_dict):
+    results = {
+        'test_auc': [], 'tp': [], 'tn': [], 'fn': [], 'fp': [],
+        'se': [], 'sp': [], 'mcc': [], 'acc': [],
+        'auc_roc_score': [], 'F1': [], 'BA': [],
+        'prauc': [], 'PPV': [], 'NPV': []
+    }
 
+    for seed in seed_list:
+        print(seed)
+        result_values = main(seed, best_dict)
+        for key, value in zip(results.keys(), result_values):
+            results[key].append(value)
+
+    for key in results:
+        results[key].append(np.mean(results[key]))
+    
+    return results
+
+def save_results_to_csv(results, filename):
+    column_names = ['tp', 'tn', 'fn', 'fp', 'se', 'sp', 'mcc', 'acc', 'auc', 'F1', 'BA', 'prauc', 'PPV', 'NPV']
+    rows = zip(results['tp'], results['tn'], results['fn'], results['fp'], results['se'], results['sp'], 
+               results['mcc'], results['acc'], results['auc_roc_score'], results['F1'], results['BA'], 
+               results['prauc'], results['PPV'], results['NPV'])
+    
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(column_names)
+        writer.writerows(rows)
+        
 Heavy_dict = cover_dict('Heavy_1280.pkl')
 Light_dict = cover_dict('Light_1280.pkl')
 Antigen_dict = cover_dict('Antigen_1280.pkl')
@@ -372,36 +401,6 @@ best_dict["learning_rate"] = best["learning_rate"]
 best_dict["batch_size"] = a[best["batch_size"]]
 best_dict["num_heads"] = b[best["num_heads"]]
 print(best_dict)
-
-def run_experiment(seed_list, best_dict):
-    results = {
-        'test_auc': [], 'tp': [], 'tn': [], 'fn': [], 'fp': [],
-        'se': [], 'sp': [], 'mcc': [], 'acc': [],
-        'auc_roc_score': [], 'F1': [], 'BA': [],
-        'prauc': [], 'PPV': [], 'NPV': []
-    }
-
-    for seed in seed_list:
-        print(seed)
-        result_values = main(seed, best_dict)
-        for key, value in zip(results.keys(), result_values):
-            results[key].append(value)
-
-    for key in results:
-        results[key].append(np.mean(results[key]))
-    
-    return results
-
-def save_results_to_csv(results, filename):
-    column_names = ['tp', 'tn', 'fn', 'fp', 'se', 'sp', 'mcc', 'acc', 'auc', 'F1', 'BA', 'prauc', 'PPV', 'NPV']
-    rows = zip(results['tp'], results['tn'], results['fn'], results['fp'], results['se'], results['sp'], 
-               results['mcc'], results['acc'], results['auc_roc_score'], results['F1'], results['BA'], 
-               results['prauc'], results['PPV'], results['NPV'])
-    
-    with open(filename, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(column_names)
-        writer.writerows(rows)
 
 if __name__ == '__main__':
     seed_list = [2, 8, 9]
