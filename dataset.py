@@ -21,7 +21,7 @@ num2str =  {i:j for j,i in str2num.items()}
 
 
 class Graph_Classification_Dataset(object):  # Graph classification task data set processing
-    def __init__(self,path,smiles_field1='Smiles1',smiles_field2='Smiles2',label_field=label, index_field=label, max_len=500,seed=1,batch_size=16,a=2,addH=True):
+    def __init__(self,path,smiles_field1='Smiles1',smiles_field2='Smiles2',label_field=label, index_field=label, max_len=500,seed=1,batch_size=16,a=1,addH=True):
         if path.endswith('.txt') or path.endswith('.tsv'):
             self.df = pd.read_csv(path,sep='\t',encoding='latin1')
         elif path.endswith('.xlsx'):
@@ -59,23 +59,6 @@ class Graph_Classification_Dataset(object):  # Graph classification task data se
         df_train_data = pd.DataFrame(train_data)
         df_test_data = pd.DataFrame(test_data)
         df_val_data = pd.DataFrame(val_data)
-        '''Splitting the dataset by random molecular scaffold, random_scaffold_split'''
-        # data = self.df
-        # data = data.fillna(666)
-        # train_ids, val_ids, test_ids = random_scaffold_split(data, sizes=(0.8, 0.1, 0.1), balanced=True,seed=self.seed)
-        # train_data = data.iloc[train_ids]
-        # val_data = data.iloc[val_ids]
-        # test_data = data.iloc[test_ids]
-        # df_train_data = pd.DataFrame(train_data)
-        # df_test_data = pd.DataFrame(test_data)
-        # df_val_data = pd.DataFrame(val_data)
-
-        '''Scaffold Split Dataset, scaffold_split'''
-        # data1 = self.df1
-        # smiles_list = data1[self.smiles_field1]    
-        # df_train_data,df_val_data,df_test_data = scaffold_split(data1, smiles_list, task_idx=None, null_value=0,
-        #            frac_train=0.8, frac_valid=0.1, frac_test=0.1,
-        #            return_smiles=False)
 
         self.dataset1 = tf.data.Dataset.from_tensor_slices(
             (df_train_data[self.smiles_field1], df_train_data[self.label_field], df_train_data[self.smiles_field2], df_train_data[self.index_field]))
