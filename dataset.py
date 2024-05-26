@@ -16,9 +16,7 @@ from itertools import compress
 
 str2num = {'<pad>':0 ,'H': 1, 'C': 2, 'N': 3, 'O': 4, 'S': 5, 'F': 6, 'Cl': 7, 'Br': 8, 'P':  9,
          'I': 10,'Na': 11,'B':12,'Se':13,'Si':14,'<unk>':15,'<mask>':16,'<global>':17}
-         
 num2str =  {i:j for j,i in str2num.items()}
-
 
 class Graph_Classification_Dataset(object):  # Graph classification task data set processing
     def __init__(self,path,smiles_field1='Smiles1',smiles_field2='Smiles2',label_field=label, index_field=label, max_len=500,seed=1,batch_size=16,a=1,addH=True):
@@ -42,7 +40,6 @@ class Graph_Classification_Dataset(object):  # Graph classification task data se
         self.addH = addH
 
     def get_data(self):
-
         '''Randomized Split Dataset'''
         data = self.df
         data = data.fillna(666)
@@ -62,7 +59,6 @@ class Graph_Classification_Dataset(object):  # Graph classification task data se
 
         self.dataset1 = tf.data.Dataset.from_tensor_slices(
             (df_train_data[self.smiles_field1], df_train_data[self.label_field], df_train_data[self.smiles_field2], df_train_data[self.index_field]))
-
         self.dataset1 = self.dataset1.map(self.tf_numerical_smiles).cache().padded_batch(batch_size=self.batch_size, padded_shapes=(
             tf.TensorShape([None]), tf.TensorShape([None, None]), tf.TensorShape([self.a]),tf.TensorShape([None]), tf.TensorShape([None, None]), tf.TensorShape([1]))).shuffle(1000).prefetch(50)
 
@@ -73,7 +69,6 @@ class Graph_Classification_Dataset(object):  # Graph classification task data se
         self.dataset3 = tf.data.Dataset.from_tensor_slices((df_val_data[self.smiles_field1], df_val_data[self.label_field], df_val_data[self.smiles_field2], df_val_data[self.index_field]))
         self.dataset3 = self.dataset3.map(self.tf_numerical_smiles).padded_batch(512, padded_shapes=(
             tf.TensorShape([None]), tf.TensorShape([None, None]), tf.TensorShape([self.a]),tf.TensorShape([None]), tf.TensorShape([None, None]), tf.TensorShape([1]))).cache().prefetch(100)
-
 
         return self.dataset1, self.dataset2, self.dataset3
 
@@ -100,7 +95,6 @@ class Graph_Classification_Dataset(object):  # Graph classification task data se
         index.set_shape([None])
         return x1, adjoin_matrix1, y, x2,adjoin_matrix2, index
 
-
 class Inference_Dataset(object):
     def __init__(self,sml_list,max_len=500,addH=True):
         self.vocab = str2num
@@ -109,7 +103,6 @@ class Inference_Dataset(object):
         self.addH =  addH
 
     def get_data(self):
-
         self.dataset = tf.data.Dataset.from_tensor_slices((self.sml_list,))
         self.dataset = self.dataset.map(self.tf_numerical_smiles).padded_batch(512, padded_shapes=(
             tf.TensorShape([None]), tf.TensorShape([None,None]),tf.TensorShape([1]),tf.TensorShape([None]))).cache().prefetch(20)
@@ -144,7 +137,6 @@ class Inference_Dataset(object):
         self.addH =  addH
 
     def get_data(self):
-
         self.dataset = tf.data.Dataset.from_tensor_slices((self.sml_list,))
         self.dataset = self.dataset.map(self.tf_numerical_smiles).padded_batch(512, padded_shapes=(
             tf.TensorShape([None]), tf.TensorShape([None,None]),tf.TensorShape([1]),tf.TensorShape([None]))).cache().prefetch(20)
