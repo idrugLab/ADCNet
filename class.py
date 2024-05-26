@@ -379,7 +379,7 @@ space = {"dense_dropout": hp.quniform("dense_dropout", 0, 0.5, 0.05),
 def hy_main(args):
     test_auc_list = []
     x = 0
-    for seed in [9]:
+    for seed in [2, 8, 9]:
         print(seed)
         test_auc,tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV = main(seed, args)
         test_auc_list.append(test_auc)
@@ -390,7 +390,7 @@ def hy_main(args):
     print(args["learning_rate"])
     print(args["batch_size"])
     print(args["num_heads"])
-    return -x
+    return -x/3
 
 best = fmin(hy_main, space, algo = tpe.suggest, max_evals= 30)
 print(best)
