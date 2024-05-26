@@ -62,36 +62,15 @@ def DAR_feature(file_path, column_name):
     column_data_normalized = tf.keras.utils.normalize(column_data_standardized, axis=0).flatten()
     data_dict = {index: tf.constant(value, dtype=tf.float32) for index, value in zip(df.index, column_data_normalized)}
     return data_dict
-    
-def run_experiment(seed_list, best_dict):
-    results = {
-        'test_auc': [], 'tp': [], 'tn': [], 'fn': [], 'fp': [],
-        'se': [], 'sp': [], 'mcc': [], 'acc': [],
-        'auc_roc_score': [], 'F1': [], 'BA': [],
-        'prauc': [], 'PPV': [], 'NPV': []
-    }
 
-    for seed in seed_list:
-        print(seed)
-        result_values = main(seed, best_dict)
-        for key, value in zip(results.keys(), result_values):
-            results[key].append(value)
-
-    for key in results:
-        results[key].append(np.mean(results[key]))
-    
-    return results
-
-def save_results_to_csv(results, filename):
-    column_names = ['tp', 'tn', 'fn', 'fp', 'se', 'sp', 'mcc', 'acc', 'auc', 'F1', 'BA', 'prauc', 'PPV', 'NPV']
-    rows = zip(results['tp'], results['tn'], results['fn'], results['fp'], results['se'], results['sp'], 
-               results['mcc'], results['acc'], results['auc_roc_score'], results['F1'], results['BA'], 
-               results['prauc'], results['PPV'], results['NPV'])
-    
-    with open(filename, mode='w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(column_names)
-        writer.writerows(rows)
+def process_list(input_list):
+    input_list.append(np.mean(input_list))
+    mean_value = np.mean(input_list[:-1])
+    std_value = np.std(input_list[:-1], ddof=0)
+    mean_range = f'{mean_value:.4f} ± {std_value:.4f}'
+    input_list[-1] = mean_range
+    print(input_list)
+    return input_list
         
 Heavy_dict = cover_dict('Heavy_1280.pkl')
 Light_dict = cover_dict('Light_1280.pkl')
@@ -404,10 +383,50 @@ best_dict["num_heads"] = b[best["num_heads"]]
 print(best_dict)
 
 if __name__ == '__main__':
-    seed_list = [2, 8, 9]
-    results = run_experiment(seed_list, best_dict)
-    filename = 'FG-BERT_output.csv'
-    save_results_to_csv(results, filename)
+    test_auc_list = []
+    tp_l, tn_l, fn_l, fp_l, se_l, sp_l, mcc_l, acc_l, auc_roc_score_l, F1_l, BA_l, prauc_l, PPV_l, NPV_l = [],[],[],[],[],[],[],[],[],[],[],[],[],[]
+    lists_to_process = [tp_l, tn_l, fn_l, fp_l, se_l, sp_l, mcc_l, acc_l, auc_roc_score_l, F1_l, BA_l, prauc_l, PPV_l, NPV_l]
+    for seed in [2,8,9]:
+        print(seed)
+        test_auc,tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV = main(seed, best_dict)
+        test_auc_list.append(test_auc)
+        tp_l.append(tp)
+        tn_l.append(tn)
+        fn_l.append(fn)
+        fp_l.append(fp)
+        se_l.append(se)
+        sp_l.append(sp)
+        mcc_l.append(mcc)
+        acc_l.append(acc)
+        auc_roc_score_l.append(auc_roc_score)
+        F1_l.append(F1)
+        BA_l.append(BA)
+        prauc_l.append(prauc)
+        PPV_l.append(PPV)
+        NPV_l.append(NPV)
+    test_auc_list.append(np.mean(test_auc_list))
+    tp_l.append(np.mean(tp_l))
+    tn_l.append(np.mean(tn_l))
+    fn_l.append(np.mean(fn_l))
+    fp_l.append(np.mean(fp_l))
+    se_l.append(np.mean(se_l))
+    sp_l.append(np.mean(sp_l))
+    mcc_l.append(np.mean(mcc_l))
+    acc_l.append(np.mean(acc_l))
+    auc_roc_score_l.append(np.mean(auc_roc_score_l))
+    F1_l.append(np.mean(F1_l))
+    BA_l.append(np.mean(BA_l))
+    prauc_l.append(np.mean(prauc_l))
+    PPV_l.append(np.mean(PPV_l))
+    NPV_l.append(np.mean(NPV_l))
+    
+    for i in range(len(lists_to_process)):
+        lists_to_process[i] = process_list(lists_to_process[i])
+    filename = 'ADCNet_output.csv'
+    column_names = ['tp', 'tn', 'fn', 'fp', 'se', 'sp', 'mcc', 'acc', 'auc', 'F1', 'BA', 'prauc','PPV', 'NPV']
+    rows = zip(tp_l, tn_l, fn_l, fp_l, se_l, sp_l, mcc_l, acc_l, auc_roc_score_l, F1_l, BA_l, prauc_l, PPV_l, NPV_l)
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
         writer.writerow(column_names)
         writer.writerows(rows)
     print(f'CSV 文件 {filename} 写入完成')
