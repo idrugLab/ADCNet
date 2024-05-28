@@ -22,6 +22,7 @@ pip install matplotlib
 pip install hyperopt
 pip install scikit-learn
 pip install torch
+pip install openpyxl
 ```
 
 ## Examples of obtaining embeddings for antibodies or antigens.
