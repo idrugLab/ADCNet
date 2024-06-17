@@ -71,7 +71,25 @@ def process_list(input_list):
     input_list[-1] = mean_range
     print(input_list)
     return input_list
-        
+
+def extract_tensors(index, heavy_dict, light_dict, antigen_dict, dar_dict):
+    heavy_tensor_list = []
+    light_tensor_list = []
+    antigen_tensor_list = []
+    DAR_tensor_list = []
+
+    for i in index.numpy():
+        heavy_tensor_list.append(heavy_dict[i[0]])
+        light_tensor_list.append(light_dict[i[0]])
+        antigen_tensor_list.append(antigen_dict[i[0]])
+        DAR_tensor_list.append(dar_dict[i[0]])
+    t1 = np.vstack(heavy_tensor_list)
+    t2 = np.vstack(light_tensor_list)
+    t3 = np.vstack(antigen_tensor_list)
+    t4 = np.vstack(DAR_tensor_list)
+    
+    return t1, t2, t3, t4
+    
 Heavy_dict = cover_dict('Heavy_1280.pkl')
 Light_dict = cover_dict('Light_1280.pkl')
 Antigen_dict = cover_dict('Antigen_1280.pkl')
@@ -116,21 +134,7 @@ def main(seed, args):
     seq2 = tf.cast(tf.math.equal(x2, 0), tf.float32)
     mask1 = seq1[:, tf.newaxis, tf.newaxis, :]
     mask2 = seq2[:, tf.newaxis, tf.newaxis, :]
-
-    heavy_tensor_list = []
-    light_tensor_list = []
-    antigen_tensor_list = []
-    DAR_tensor_list = []
-    for i in index.numpy():
-        heavy_tensor_list.append(Heavy_dict[i[0]])
-        light_tensor_list.append(Light_dict[i[0]])
-        antigen_tensor_list.append(Antigen_dict[i[0]])
-        DAR_tensor_list.append(DAR_dict[i[0]])
-    t1 = np.vstack(heavy_tensor_list)
-    t2 = np.vstack(light_tensor_list)
-    t3 = np.vstack(antigen_tensor_list)
-    t4 = np.vstack(DAR_tensor_list)
-    
+    t1, t2, t3, t4 = extract_tensors(index, Heavy_dict, Light_dict, Antigen_dict, DAR_dict)
     model = PredictModel(num_layers=num_layers,
                          d_model=d_model,
                          dff=dff, 
@@ -169,19 +173,7 @@ def main(seed, args):
     for epoch in range(200):
         loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
         for x1, adjoin_matrix1, y, x2, adjoin_matrix2, index in train_dataset:
-            heavy_tensor_list = []
-            light_tensor_list = []
-            antigen_tensor_list = []
-            DAR_tensor_list = []
-            for i in index.numpy():
-                heavy_tensor_list.append(Heavy_dict[i[0]])
-                light_tensor_list.append(Light_dict[i[0]])
-                antigen_tensor_list.append(Antigen_dict[i[0]])
-                DAR_tensor_list.append(DAR_dict[i[0]])
-            t1 = np.vstack(heavy_tensor_list)
-            t2 = np.vstack(light_tensor_list)
-            t3 = np.vstack(antigen_tensor_list)
-            t4 = np.vstack(DAR_tensor_list)
+            t1, t2, t3, t4 = extract_tensors(index, Heavy_dict, Light_dict, Antigen_dict, DAR_dict)
             with tf.GradientTape() as tape:
                 seq1 = tf.cast(tf.math.equal(x1, 0), tf.float32)
                 mask1 = seq1[:, tf.newaxis, tf.newaxis, :]
@@ -196,19 +188,7 @@ def main(seed, args):
         y_true = []
         y_preds = []
         for x1, adjoin_matrix1, y, x2, adjoin_matrix2, index in val_dataset:
-            heavy_tensor_list = []
-            light_tensor_list = []
-            antigen_tensor_list = []
-            DAR_tensor_list = []
-            for i in index.numpy():
-                heavy_tensor_list.append(Heavy_dict[i[0]])
-                light_tensor_list.append(Light_dict[i[0]])
-                antigen_tensor_list.append(Antigen_dict[i[0]])
-                DAR_tensor_list.append(DAR_dict[i[0]])
-            t1 = np.vstack(heavy_tensor_list)
-            t2 = np.vstack(light_tensor_list)
-            t3 = np.vstack(antigen_tensor_list)
-            t4 = np.vstack(DAR_tensor_list)
+            t1, t2, t3, t4 = extract_tensors(index, Heavy_dict, Light_dict, Antigen_dict, DAR_dict)
             seq1 = tf.cast(tf.math.equal(x1, 0), tf.float32)
             mask1 = seq1[:, tf.newaxis, tf.newaxis, :]
             seq2 = tf.cast(tf.math.equal(x2, 0), tf.float32)
@@ -243,19 +223,7 @@ def main(seed, args):
     y_preds = []
     model.load_weights('classification_weights/{}_{}.h5'.format(task, seed))
     for x1, adjoin_matrix1, y, x2, adjoin_matrix2, index in test_dataset:
-        heavy_tensor_list = []
-        light_tensor_list = []
-        antigen_tensor_list = []
-        DAR_tensor_list = []
-        for i in index.numpy():
-            heavy_tensor_list.append(Heavy_dict[i[0]])
-            light_tensor_list.append(Light_dict[i[0]])
-            antigen_tensor_list.append(Antigen_dict[i[0]])
-            DAR_tensor_list.append(DAR_dict[i[0]])
-        t1 = np.vstack(heavy_tensor_list)
-        t2 = np.vstack(light_tensor_list)
-        t3 = np.vstack(antigen_tensor_list)
-        t4 = np.vstack(DAR_tensor_list)
+        t1, t2, t3, t4 = extract_tensors(index, Heavy_dict, Light_dict, Antigen_dict, DAR_dict)
         seq1 = tf.cast(tf.math.equal(x1, 0), tf.float32)
         mask1 = seq1[:, tf.newaxis, tf.newaxis, :]
         seq2 = tf.cast(tf.math.equal(x2, 0), tf.float32)
