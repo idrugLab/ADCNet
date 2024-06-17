@@ -188,27 +188,13 @@ def main(seed, args):
                 seq2 = tf.cast(tf.math.equal(x2, 0), tf.float32)
                 mask2 = seq2[:, tf.newaxis, tf.newaxis, :]
                 preds = model(x1=x1, mask1=mask1,training=True,adjoin_matrix1=adjoin_matrix1, x2=x2, mask2=mask2, adjoin_matrix2=adjoin_matrix2,t1=t1,t2=t2,t3=t3,t4=t4)
-                loss = 0
-                for i in range(len(label)):
-                    y_label = y[:,i]
-                    y_pred = preds[:,i]
-                    validId = np.where((y_label == 0) | (y_label == 1))[0]
-                    if len(validId) == 0:
-                        continue
-                    y_t = tf.gather(y_label,validId)
-                    y_p = tf.gather(y_pred,validId)
-            
-                    loss += loss_object(y_t, y_p)
-                loss = loss/(len(label))
+                loss = loss_object(y,preds)
                 grads = tape.gradient(loss, model.trainable_variables)
                 optimizer.apply_gradients(zip(grads, model.trainable_variables))
         print('epoch: ', epoch, 'loss: {:.4f}'.format(loss.numpy().item()))
 
-        y_true = {}
-        y_preds = {}
-        for i in range(len(label)):
-            y_true[i] = []
-            y_preds[i] = []
+        y_true = []
+        y_preds = []
         for x1, adjoin_matrix1, y, x2, adjoin_matrix2, index in val_dataset:
             heavy_tensor_list = []
             light_tensor_list = []
@@ -228,43 +214,14 @@ def main(seed, args):
             seq2 = tf.cast(tf.math.equal(x2, 0), tf.float32)
             mask2 = seq2[:, tf.newaxis, tf.newaxis, :]
             preds = model(x1=x1, mask1=mask1,training=False,adjoin_matrix1=adjoin_matrix1, x2=x2, mask2=mask2, adjoin_matrix2=adjoin_matrix2,t1=t1,t2=t2,t3=t3,t4=t4)
-            for i in range(len(label)):
-                y_label = y[:,i]
-                y_pred = preds[:,i]
-                y_true[i].append(y_label)
-                y_preds[i].append(y_pred)
-        y_tr_dict = {}
-        y_pr_dict = {}
-        for i in range(len(label)):
-            y_tr = np.array([])
-            y_pr = np.array([])
-            for j in range(len(y_true[i])):
-                a = np.array(y_true[i][j])
-                b = np.array(y_preds[i][j])
-                y_tr = np.concatenate((y_tr,a))
-                y_pr = np.concatenate((y_pr,b))
-            y_tr_dict[i] = y_tr
-            y_pr_dict[i] = y_pr
-
-        AUC_list = []
-
-        for i in range(len(label)):
-            y_label = y_tr_dict[i]
-            y_pred = y_pr_dict[i]
-            validId = np.where((y_label== 0) | (y_label == 1))[0]
-            if len(validId) == 0:
-                continue
-            y_t = tf.gather(y_label,validId)
-            y_p = tf.gather(y_pred,validId)
-            if all(target == 0 for target in y_t) or all(target == 1 for target in y_t):
-                AUC = float('nan')
-                AUC_list.append(AUC)
-                continue
-            y_p = tf.sigmoid(y_p).numpy()
-            AUC_new = sklearn.metrics.roc_auc_score(y_t, y_p, average=None)
-
-            AUC_list.append(AUC_new)
-        auc_new = np.nanmean(AUC_list)
+            y_label = y
+            y_pred = preds
+            y_true.append(y_label)
+            y_preds.append(y_pred)
+        y_true = np.concatenate(y_true,axis=0).reshape(-1)
+        y_preds = np.concatenate(y_preds,axis=0).reshape(-1)
+        y_preds = tf.sigmoid(y_preds).numpy()
+        auc_new = roc_auc_score(y_true,y_preds)
 
         print('val auc:{:.4f}'.format(auc_new))
         if auc_new> auc:
@@ -282,11 +239,8 @@ def main(seed, args):
         if stopping_monitor > 30:
             break
 
-    y_true = {}
-    y_preds = {}
-    for i in range(len(label)):
-        y_true[i] = []
-        y_preds[i] = []
+    y_true = []
+    y_preds = []
     model.load_weights('classification_weights/{}_{}.h5'.format(task, seed))
     for x1, adjoin_matrix1, y, x2, adjoin_matrix2, index in test_dataset:
         heavy_tensor_list = []
@@ -307,47 +261,20 @@ def main(seed, args):
         seq2 = tf.cast(tf.math.equal(x2, 0), tf.float32)
         mask2 = seq2[:, tf.newaxis, tf.newaxis, :]
         preds = model(x1=x1, mask1=mask1,training=False,adjoin_matrix1=adjoin_matrix1, x2=x2, mask2=mask2, adjoin_matrix2=adjoin_matrix2,t1=t1,t2=t2,t3=t3,t4=t4)
-        for i in range(len(label)):
-            y_label = y[:,i]
-            y_pred = preds[:,i]
-            y_true[i].append(y_label)
-            y_preds[i].append(y_pred)
-    y_tr_dict = {}
-    y_pr_dict = {}
-    for i in range(len(label)):
-        y_tr = np.array([])
-        y_pr = np.array([])
-        for j in range(len(y_true[i])):
-            a = np.array(y_true[i][j])
-            if a.ndim == 0:
-                continue
-            b = np.array(y_preds[i][j])
-            y_tr = np.concatenate((y_tr,a))
-            y_pr = np.concatenate((y_pr,b))
-        y_tr_dict[i] = y_tr
-        y_pr_dict[i] = y_pr
-    auc_list = []
-    for i in range(len(label)):
-        y_label = y_tr_dict[i]
-        y_pred = y_pr_dict[i]
-        validId = np.where((y_label== 0) | (y_label == 1))[0]
-        if len(validId) == 0:
-            continue
-        y_t = tf.gather(y_label,validId)
-        y_p = tf.gather(y_pred,validId)
-        if all(target == 0 for target in y_t) or all(target == 1 for target in y_t):
-            AUC = float('nan')
-            auc_list.append(AUC)
-            continue
-        y_p = tf.sigmoid(y_p).numpy()
-        AUC_new = sklearn.metrics.roc_auc_score(y_t, y_p, average=None)
-        auc_list.append(AUC_new)
+        y_label = y
+        y_pred = preds
+        y_true.append(y_label)
+        y_preds.append(y_pred)
 
-    test_auc = np.nanmean(auc_list)
-    tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV = score(y_t, y_p)
+    y_true = np.concatenate(y_true, axis=0).reshape(-1)
+    y_preds = np.concatenate(y_preds, axis=0).reshape(-1)
+    y_preds = tf.sigmoid(y_preds).numpy()
+    test_auc = roc_auc_score(y_true, y_preds)
+    
+    tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV = score(y_true, y_preds)
     print('test auc:{:.4f}'.format(test_auc))
 
-    return test_auc,tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV                                                        
+    return test_auc,tp, tn, fn, fp, se, sp, mcc, acc, auc_roc_score, F1, BA, prauc, PPV, NPV                                                     
 
 space = {"dense_dropout": hp.quniform("dense_dropout", 0, 0.5, 0.05), 
         "learning_rate": hp.loguniform("learning_rate", np.log(3e-5), np.log(15e-5)),
