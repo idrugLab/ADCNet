@@ -44,7 +44,7 @@ def score(y_test, y_pred):
     y_pred_print = [round(y, 0) for y in y_pred]
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred_print).ravel()
     se = tp / (tp + fn)
-    sp = tn / (tn + fp)  # 也是R
+    sp = tn / (tn + fp)
     acc = (tp + tn) / (tp + fn + tn + fp)
     mcc = (tp * tn - fn * fp) / math.sqrt((tp + fn) * (tp + fp) * (tn + fn) * (tn + fp))
     P = tp / (tp + fp)
@@ -356,6 +356,6 @@ if __name__ == '__main__':
         writer = csv.writer(file)
         writer.writerow(column_names)
         writer.writerows(rows)
-    print(f'CSV 文件 {filename} 写入完成')
+    print(f'CSV file {filename} was successfully written')
 
 
