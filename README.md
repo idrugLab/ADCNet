@@ -36,6 +36,7 @@ After completion of the run, you will find a .pkl file in the current directory.
 First, run ESM-2.py to obtain embeddings for the heavy chain, light chain, and antigen of the antibody. The code will save these embeddings into three pkl files.
 Secondly, Ensure that each data entry contains the DAR value.
 Finally, Create a folder named "medium3_weights" and place the file "bert_weightsMedium_20.h5" from this repository into that folder.
+
 ```ruby
 conda activate ADCNet
 python class.py
@@ -44,6 +45,7 @@ python class.py
 First, run ESM-2.py to obtain embeddings for the heavy chain, light chain, and antigen of the antibody. The code will save these embeddings into three pkl files.
 Secondly, Ensure that each data entry contains the DAR value.
 Finally, Create a folder named "classification_weights" and place the file "ADC_9.h5" from this repository into that folder.
+If you want to reproduce the results of this article, run class.py directly. If you want to search for hyperparameters again, uncomment the code in the hyperparameter search section (lines 254-279) and comment the original hyperparameters (lines 281-285).
 ```ruby
 conda activate ADCNet
 python inference.py
