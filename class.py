@@ -268,7 +268,7 @@ space = {"dense_dropout": hp.quniform("dense_dropout", 0, 0.5, 0.05),
 #     return -x/3
 
 # best = fmin(hy_main, space, algo = tpe.suggest, max_evals= 30)
-#print(best)
+# print(best)
 
 # best_dict = {}
 # a = [16,32,48,64]
