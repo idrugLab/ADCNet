@@ -147,4 +147,4 @@ dependencies:
     - werkzeug==2.2.1
     - wrapt==1.14.1
     - zipp==3.8.1
-prefix: /share/home/yyzh/anaconda3/envs/ADCN
+prefix: /share/home/yyzh/anaconda3/envs/ADCNet
