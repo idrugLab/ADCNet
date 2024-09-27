@@ -1,7 +1,9 @@
 # ADCNet
 semi-supervised learning for ADC property prediction.
 ![image](https://github.com/idrugLab/ADCNet/blob/main/ADCNet.png)
-
+# Description of the document
+py37.yaml is the version of the various packages for the installed environment
+The files folder contains antibody heavy and light chains, antigen macromolecule embedding, and ADC data.
 # Requried package: 
 ## Example of ESM-2 environment installation：
 ```ruby
