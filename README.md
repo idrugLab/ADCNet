@@ -54,6 +54,7 @@ python inference.py
 ## Using ADCNet for predictions
 ```ruby
 You can visit the (https://ADCNet.idruglab.cn) website to make predictions.
+Note: The ADCNet model is designed to help determine ADC data activity that is difficult for humans to assess. During training, the model is still able to produce high-confidence predictions for unreasonable human-input ADC data, as no obviously unreasonable negative data is introduced. To improve the efficiency of the system's inference, we will introduce a filtering mechanism to avoid using the model to make inference predictions on these data during site deployment to ensure that the output is reliable and maintains a fast response.
 ```
 
 
