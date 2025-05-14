@@ -18,7 +18,7 @@ protain = df['Antigen Sequence（64）'].tolist()
 smiles = df['ADC ID'].tolist()
 
 datas = []
-for i in range(len(protain)):
+for i in range(len(protein)):
     datas.append((smiles[i], protain[i])) 
 
 sequence_representations = []
